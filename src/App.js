@@ -21,12 +21,14 @@ export const App = () => {
   //utility function to offset arrays
   const offset = (arr, offset) => [...arr.slice(offset), ...arr.slice(0, offset)];
   
-  
+  //states: root note, mode and the resulting scale
   const [rootNote, selectNewRootNote] = useState("C");
   
   const [selectedMode, selectNewMode] = useState("Ionian");
 
   const [scale, setNewScale] = useState(["C","D","E","F","G","A","B"])
+
+  const [chords, setNewChords] = useState([])
 
   const onModeChange = (modeName) => {
     selectNewMode(modeName);
@@ -50,9 +52,19 @@ export const App = () => {
       newScale.push(shiftedChromatic[index]);
       index += currentInterval;
     });
-    
-    setNewScale(newScale)
+    buildDiatonicChords(newScale);
+    setNewScale(newScale);
 
+  }
+
+  const buildDiatonicChords = (scale) => {
+    const extendedScale = [...scale, ...scale]
+    let chords = []
+    
+    scale.forEach((note,index) => {
+      chords.push([note, extendedScale[index + 2], extendedScale[index + 4]])
+    })
+    setNewChords(chords)
   }
 
   return (
@@ -80,6 +92,11 @@ export const App = () => {
       
       <p>Selected scale: {rootNote} {selectedMode}</p>
       <p>{scale}</p>
+      <p>Available chords:</p>
+      <ul>
+        {chords.map((chord,index) => <li key={index}>{chord}</li>)}
+      </ul>
+
     </div>
     )
 };
