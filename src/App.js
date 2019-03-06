@@ -4,7 +4,7 @@ import "./main.css";
 export const App = () => {
 
   //The music theory
-  const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   const scales = ["Ionian","Dorian","Phrygian","Lydian","Mixolydian","Aeolian","Locrian"]
   const majorIntervals = [2,2,1,2,2,2,1]
 
@@ -22,35 +22,46 @@ export const App = () => {
   const offset = (arr, offset) => [...arr.slice(offset), ...arr.slice(0, offset)];
   
   
-  const [selectedNote, selectNewNote] = useState("C");
+  const [rootNote, selectNewRootNote] = useState("C");
   
-  const [selectedScale, selectNewScale] = useState("Ionian");
+  const [selectedMode, selectNewMode] = useState("Ionian");
 
-  const [intervals, setIntervals] = useState(majorIntervals)
+  const [scale, setNewScale] = useState(["C","D","E","F","G","A","B"])
 
-  const onScaleChange = (scaleName) => {
-    selectNewScale(scaleName);
-    const newInterevals = offset(majorIntervals, scaleOffsets[scaleName]);
-    setIntervals(newInterevals);
+  const onModeChange = (modeName) => {
+    selectNewMode(modeName);
+    buildScale(rootNote, modeName);
   }
 
-  const buildScale = (rootNote) =>  {
-    const offsetChromaticScale = offset(notes, notes.indexOf(rootNote));
+  const onRootNoteChange = (newRootNote) => {
+    selectNewRootNote(newRootNote);
+    buildScale(newRootNote, selectedMode);
+  }
+  
+  const buildScale = (rootNote, mode) => {
+    
+    const intervals = offset(majorIntervals, scaleOffsets[mode]);
+    const shiftedChromatic = offset(chromaticScale, chromaticScale.indexOf(rootNote));
+
+    let newScale = [];
     let index = 0;
-    let resultingScale = []
-    intervals.forEach((interval) => {
-      resultingScale.push(offsetChromaticScale[index]);
-      index += interval;
+
+    intervals.forEach((currentInterval) => {
+      newScale.push(shiftedChromatic[index]);
+      index += currentInterval;
     });
-    return resultingScale;
+    
+    setNewScale(newScale)
+
   }
+
   return (
     <div>
       <select id="root-note" 
-        value={selectedNote}
-        onChange={e => selectNewNote(e.target.value)}
+        value={rootNote}
+        onChange={e => onRootNoteChange(e.target.value)}
       >
-        {notes.map((note, index) => 
+        {chromaticScale.map((note, index) => 
           <option 
             value={note} 
             key={index}
@@ -60,15 +71,15 @@ export const App = () => {
         )};
       </select>
       
-      <select value={selectedScale} 
+      <select value={selectedMode} 
         onChange={e => {
-          onScaleChange(e.target.value)
+          onModeChange(e.target.value)
         }}>
         { scales.map((scale, index) =>  <option value={scale} key={index}>{scale}</option> ) }
       </select>
       
-      <p>Selected scale: {selectedNote} {selectedScale}</p>
-      <p>{buildScale(selectedNote)}</p>
+      <p>Selected scale: {rootNote} {selectedMode}</p>
+      <p>{scale}</p>
     </div>
     )
 };
